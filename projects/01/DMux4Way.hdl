@@ -14,7 +14,7 @@ CHIP DMux4Way {
     OUT a, b, c, d;
 
     PARTS:
-    //// Replace this comment with your code.
+    // 01の時、 sel[1] が 0、sel[0] が 1で右側から順になってる
     // a = in & !sel[0] & !sel[1]
     // b = in & sel[0] & !sel[1]
     // c = in & !sel[0] & sel[1]

@@ -11,7 +11,7 @@ CHIP And {
     OUT out;
     
     PARTS:
-    //// Replace this comment with your code.
+    // Nandをひっくり返す
     Nand(a=a, b=b, out=notab);
     Not(in=notab, out=out);
 }

@@ -11,6 +11,6 @@ CHIP Not {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    // 二つの端子に同じ信号を入力する
     Nand(a=in, b=in, out=out);
 }

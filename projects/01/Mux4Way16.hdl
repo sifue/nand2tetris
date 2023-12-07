@@ -14,7 +14,6 @@ CHIP Mux4Way16 {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
     // Mux16の出力を二つくっつける
     // ビットは右側から順につなげる
     Mux16(a=a, b=b, sel=sel[0], out=ab);
