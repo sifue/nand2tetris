@@ -12,4 +12,12 @@ CHIP Mux {
 
     PARTS:
     //// Replace this comment with your code.
+    // sel が 0 なら a を、1 なら b を出力する
+    // (a * !sel) + (b * sel) と同じそう
+    // sel = 0の時、!sel = 1 なので、a * 1 + b * 0 = a
+    // sel = 1の時、!sel = 0 なので、a * 0 + b * 1 = b
+    Not(in=sel, out=nsel);
+    And(a=a, b=nsel, out=an);
+    And(a=b, b=sel, out=bn);
+    Or(a=an, b=bn, out=out);
 }
