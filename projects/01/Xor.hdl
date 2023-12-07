@@ -12,4 +12,11 @@ CHIP Xor {
 
     PARTS:
     //// Replace this comment with your code.
+    // 上の式を素直に表現する
+    // a * !b + !a * b
+    Not(in=a, out=na);
+    Not(in=b, out=nb);
+    And(a=a, b=nb, out=anb);
+    And(a=na, b=b, out=nab);
+    Or(a=anb, b=nab, out=out);
 }
