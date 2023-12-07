@@ -12,4 +12,14 @@ CHIP Or8Way {
 
     PARTS:
     //// Replace this comment with your code.
+    // 8股のORゲートを作る8→4→2→1で集約していく
+    Or(a=in[0], b=in[1], out=out11);
+    Or(a=in[2], b=in[3], out=out12);
+    Or(a=in[4], b=in[5], out=out13);
+    Or(a=in[6], b=in[7], out=out14);
+
+    Or(a=out11, b=out12, out=out21);
+    Or(a=out13, b=out14, out=out22);
+
+    Or(a=out21, b=out22, out=out);
 }
