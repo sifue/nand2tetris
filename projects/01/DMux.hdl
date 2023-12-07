@@ -12,4 +12,10 @@ CHIP DMux {
 
     PARTS:
     //// Replace this comment with your code.
+    // in * !sel => a
+    // in * sel => b
+    // となるのでこれを実装
+    Not(in=sel, out=nsel);
+    And(a=in, b=nsel, out=a);
+    And(a=in, b=sel, out=b);
 }
