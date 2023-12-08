@@ -11,5 +11,7 @@ CHIP Not {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    // aとbに同じ値を入れたらNotの役割を果たしそう
+    Nand(a=in, b=in, out=out);
+    
 }
