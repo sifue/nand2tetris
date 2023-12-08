@@ -11,5 +11,6 @@ CHIP Inc16 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // 実は  b[0]=true, b[1..15]=false のように書ける
+    Add16(a=in, b[0]=true, b[1..15]=false, out=out);
 }
