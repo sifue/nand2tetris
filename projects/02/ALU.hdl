@@ -40,5 +40,9 @@ CHIP ALU {
         ng;      // (out < 0,  1, 0)
 
     PARTS:
-    //// Replace this comment with your code.
+    // 使える部品
+    // 多ビットマルチプレクサ Mux16
+    // if (zx == 1) sets x = 0        // 16-bit constant
+    Mux16(a=x, b=false, sel=zx, out=x1);
+
 }
