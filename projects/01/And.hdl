@@ -11,5 +11,7 @@ CHIP And {
     OUT out;
     
     PARTS:
-    //// Replace this comment with your code.
+    // 我々の手持ちにある回路は、Nand (Not And) と Not だけである。
+    Nand(a=a, b=b, out=nand);
+    Not(in=nand, out=out);
 }
