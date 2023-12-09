@@ -42,7 +42,52 @@ CHIP ALU {
     PARTS:
     // 使える部品
     // 多ビットマルチプレクサ Mux16
+    
     // if (zx == 1) sets x = 0        // 16-bit constant
     Mux16(a=x, b=false, sel=zx, out=x1);
+    
+    // if (nx == 1) sets x = !x       // bitwise not
+    // 反転とは、0 => 1, 1 => 0、つまりNot
+    Not16(in=x1, out=nx1);
+    Mux16(a=x1, b=nx1, sel=nx, out=x2);
+
+    // if (zy == 1) sets y = 0        // 16-bit constant
+    Mux16(a=y, b=false, sel=zy, out=y1);
+
+    // if (ny == 1) sets y = !y       // bitwise not
+    // 反転とは、0 => 1, 1 => 0、つまりNot
+    Not16(in=y1, out=ny1);
+    Mux16(a=y1, b=ny1, sel=ny, out=y2);
+
+    // if (f == 1)  sets out = x + y  // integer 2's complement addition // xoy1
+    // if (f == 0)  sets out = x & y  // bitwise and // xay1
+    Or16(a=x2, b=y2, out=xoy1);
+    And16(a=x2, b=y2, out=xay1);
+    Mux16(a=xay1, b=xoy1, sel=f, out=out1);
+
+    // if (no == 1) sets out = !out   // bitwise not
+    // 後半の読み込みのために、out2を用意 (outは読めないため)
+    Not16(in=out1, out=nout1);
+    Mux16(a=out1, b=nout1, sel=no, out=out2);
+    Mux16(a=out2, b=false, sel=false, out=out);
+
+    // zr,      // (out == 0, 1, 0)
+    // out == 0 なら そうでないなら1を返す zr
+    // 多入力Orを使って16ビット全てをOrして0か調べる
+    // out16or は 16ビットのOr結果、0ならfalse、1ならtrue
+    // つまり、out16orが0ならzrはtrue、out16orが1ならzrはfalse
+    // エラー対応 sub bus of an internal node may not be used: load ALU.hdl 
+    // https://github.com/tez3998/nand2tetris?tab=readme-ov-file#sub-bus-of-an-internal-node-may-not-be-used
+    Or8Way(in=out2[0..7], out=out8or);
+    Or8Way(in=out2[8..15], out=out8or2);
+    Or(a=out8or, b=out8or2, out=out16or);
+    Mux(a=true, b=false, sel=out16or, out=zr);
+
+    // ng;      // (out < 0,  1, 0)
+    // out < 0 なら そうでないなら1を返す ng
+    // 負かどうかは、最上位ビットが1かどうかで判断できる
+    // out[15] は 最上位ビット
+    // out[15] が1ならngはtrue、out[15]が0ならngはfalse
+    Mux(a=false, b=true, sel=out2[15], out=ng);
 
 }
