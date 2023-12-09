@@ -1,0 +1,14 @@
+/**
+ * 16-way Or gate: 
+ * out = in[0] Or in[1] Or ... Or in[15]
+ */
+CHIP Or16Way {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    // Or8Wayを集約
+    Or8Way(in=in[0..7], out=out8or);
+    Or8Way(in=in[8..15], out=out8or2);
+    Or(a=out8or, b=out8or2, out=out);
+}

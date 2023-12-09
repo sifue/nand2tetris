@@ -76,18 +76,20 @@ CHIP ALU {
     // 多入力Orを使って16ビット全てをOrして0か調べる
     // out16or は 16ビットのOr結果、0ならfalse、1ならtrue
     // つまり、out16orが0ならzrはtrue、out16orが1ならzrはfalse
-    // エラー対応 sub bus of an internal node may not be used: load ALU.hdl 
+    // Or8Way利用時の エラー対応 sub bus of an internal node may not be used: load ALU.hdl 
     // https://github.com/tez3998/nand2tetris?tab=readme-ov-file#sub-bus-of-an-internal-node-may-not-be-used
-    Or8Way(in=out2[0..7], out=out8or);
-    Or8Way(in=out2[8..15], out=out8or2);
-    Or(a=out8or, b=out8or2, out=out16or);
+    // Or16Way.hdl を作成
+    Or16Way(in=out2, out=out16or);
     Mux(a=true, b=false, sel=out16or, out=zr);
 
     // ng;      // (out < 0,  1, 0)
     // out < 0 なら そうでないなら1を返す ng
     // 負かどうかは、最上位ビットが1かどうかで判断できる
-    // out[15] は 最上位ビット
-    // out[15] が1ならngはtrue、out[15]が0ならngはfalse
-    Mux(a=false, b=true, sel=out2[15], out=ng);
+    // out2[15] は 最上位ビット
+    // out2[15] が1ならngはtrue、out[15]が0ならngはfalse
+    // エラー対応  sub bus of an internal node may not be used
+    // 16ビットの最上位ビットを取得するチップを作成
+    // IsNeg16.hdl を作成
+    IsNeg16(in=out2, out=ng);
 
 }

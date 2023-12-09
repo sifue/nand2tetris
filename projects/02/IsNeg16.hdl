@@ -1,0 +1,12 @@
+/**
+ * 16-bit num is Negative: 
+ * out = in[0] Or in[1] Or ... Or in[15]
+ */
+CHIP IsNeg16 {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    // 上位1bit を取得して返す
+    Mux(a=false, b=true, sel=in[15], out=out);
+}
