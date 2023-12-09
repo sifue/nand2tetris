@@ -59,11 +59,11 @@ CHIP ALU {
     Not16(in=y1, out=ny1);
     Mux16(a=y1, b=ny1, sel=ny, out=y2);
 
-    // if (f == 1)  sets out = x + y  // integer 2's complement addition // xoy1
-    // if (f == 0)  sets out = x & y  // bitwise and // xay1
-    Or16(a=x2, b=y2, out=xoy1);
-    And16(a=x2, b=y2, out=xay1);
-    Mux16(a=xay1, b=xoy1, sel=f, out=out1);
+    // if (f == 1)  sets out = x + y  // integer 2's complement addition // xaddy1
+    // if (f == 0)  sets out = x & y  // bitwise and // xny1
+    Add16(a=x2, b=y2, out=xaddy1);
+    And16(a=x2, b=y2, out=xny1);
+    Mux16(a=xny1, b=xaddy1, sel=f, out=out1);
 
     // if (no == 1) sets out = !out   // bitwise not
     // 後半の読み込みのために、out2を用意 (outは読めないため)
