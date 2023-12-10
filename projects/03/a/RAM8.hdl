@@ -13,5 +13,21 @@ CHIP RAM8 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+
+    // レジスタを8個並べて切り替えができるようにする
+    // まずは入ってきたものを DMux8Way16 を新たに実装し切り替える
+    DMux8Way16(in=in, sel=address, a=dmux1, b=dmux2, c=dmux3, d=dmux4, e=dmux5, f=dmux6, g=dmux7, h=dmux8);
+
+    // それぞれのレジスタにつなげる
+    Register(in=dmux1, load=load, out=reg1);
+    Register(in=dmux2, load=load, out=reg2);
+    Register(in=dmux3, load=load, out=reg3);
+    Register(in=dmux4, load=load, out=reg4);
+    Register(in=dmux5, load=load, out=reg5);
+    Register(in=dmux6, load=load, out=reg6);
+    Register(in=dmux7, load=load, out=reg7);
+    Register(in=dmux8, load=load, out=reg8);
+    
+    // それぞれのレジスタの出力をMux8Way16で切り替える
+    Mux8Way16(a=reg1, b=reg2, c=reg3, d=reg4, e=reg5, f=reg6, g=reg7, h=reg8, sel=address, out=out);
 }
