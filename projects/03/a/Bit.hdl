@@ -11,7 +11,11 @@
 CHIP Bit {
     IN in, load;
     OUT out;
-
+    // BUILTIN Bit;
     PARTS:
-    //// Replace this comment with your code.
+    // 図3-1の回路を参考にして、Bit.hdlを完成させる
+    // loadが1の時はinの値をoutに代入する (逆なので注意)
+    Mux(a=defOut, b=in, sel=load, out=muxOut);
+    // out=defOut, out=out このような書き方で二つのoutを同時に定義できる
+    DFF(in=muxOut, out=defOut, out=out);
 }
