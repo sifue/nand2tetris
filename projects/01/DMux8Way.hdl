@@ -30,7 +30,7 @@ CHIP DMux8Way {
 
     And(a=in, b=nsel2, out=a1);
     And(a=a1, b=nsel1, out=a2);
-    And(a=a2, b=nsel1, out=a);
+    And(a=a2, b=nsel0, out=a);
     
     And(a=in, b=nsel2, out=b1);
     And(a=b1, b=nsel1, out=b2);
@@ -55,5 +55,9 @@ CHIP DMux8Way {
     And(a=in, b=sel[2], out=g1);
     And(a=g1, b=sel[1], out=g2);
     And(a=g2, b=nsel0, out=g);
+
+    And(a=in, b=sel[2], out=h1);
+    And(a=h1, b=sel[1], out=h2);
+    And(a=h2, b=sel[0], out=h);
         
 }
