@@ -11,5 +11,19 @@ CHIP Xor {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    // 我々が今持っている部品
+    // Not(in=, out=);
+    // And(a=, b=, out=);
+    // Nand(a=, b=, out=);
+    // Or(a=, b=, out=);
+    // 真理値表の全ての条件をOR(論理和)すると、XORになる
+    // !a & b (Xor.cmpの2行目)
+    // a & !b (Xor.cmpの3行目)
+    // これをORすると、XORになる
+    // このやり方を正準表現という
+    Not(in=a, out=nota);
+    Not(in=b, out=notb);
+    And(a=a, b=notb, out=aandnotb);
+    And(a=nota, b=b, out=notaandb);
+    Or(a=aandnotb, b=notaandb, out=out);
 }

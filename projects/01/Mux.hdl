@@ -11,5 +11,34 @@ CHIP Mux {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    // 我々が今持っている部品
+    // Not(in=, out=);
+    // And(a=, b=, out=);
+    // Nand(a=, b=, out=);
+    // Or(a=, b=, out=);
+    // Xor(a=, b=, out=);
+    // And は情報は通すやつという使い方ができる
+    // sel が 0 なら a を通す
+    // sel が 1 なら b を通す
+    // これを実現したい
+    // sel が 0 の時、 !selは 1 になる
+    // a & !sel で sel = 0の時は a を通す
+    // b & sel で sel = 0の時は b は常に 0 になる
+    // この二つの論理和をすると、
+    // sel = 0 の時は a を通すが b は無視するみたいな挙動になる
+    // a & !sel | b & sel
+    // これをsel=1の時も見てみる
+    // sel = 1 の時、 !selは 0 になる
+    // a & !sel で sel = 1の時は a は常に 0 になる
+    // b & sel で sel = 1の時は b を通す
+    // この二つの論理和をすると、
+    // sel = 1 の時は b を通すが a は無視するみたいな挙動になる
+    // どうやら正しそう？
+    // 正準表現でaを通す時の論理式とbを通す時の論理式をOrでくっつける
+    // a & !sel | b & sel
+    Not(in=sel, out=nsel);
+    And(a=a, b=nsel, out=an);
+    And(a=b, b=sel, out=bn);
+    Or(a=an, b=bn, out=out);
+    // 実はこれが論理回路で実現するIF分岐のようなもの
 }
