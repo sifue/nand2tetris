@@ -11,5 +11,17 @@ CHIP DMux {
     OUT a, b;
 
     PARTS:
-    //// Replace this comment with your code.
+    // sel を反転してビットフラグをつくっておき、
+    // aとbに分配して送っておくということで実現できそう
+    // Andはそのビットフラグが立っていれば、ビットマスクとして
+    // 立ってる時に信号を通す、という動きをしてくれる
+    Not(in=sel, out=nsel);
+    // And はビットマスクとして機能する
+    // そのビットを拾い上げる機能がある
+    // nselが1の時 in を a に通したい
+    // つまり nsel と in の And が a になる
+    And(a=in, b=nsel, out=a);
+    // selが1の時 in を b に通したい
+    // つまり sel と in の And が b になる
+    And(a=in, b=sel, out=b);
 }
