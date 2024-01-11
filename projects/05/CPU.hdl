@@ -59,13 +59,16 @@ CHIP CPU {
 
     // 制御を受けてALUかInstraction(命令メモリからの入力)を選択する
     // C命令のd1が1の場合は、ALUの出力をAレジスタにロードする (P100を参照)
-    // instruction[5] = 1 ならば、ALUの出力をAレジスタにロードする
+    // d1 instruction[5] = 1 ならば、ALUの出力をAレジスタにロードする
     // つまり、instruction[15] = 1 かつ instruction[5] = 1 の場合は、ALUの出力をAレジスタにロードする
     And(a=instruction[15], b=instruction[5], out=loadALUonAReg);
     Mux16(a=instruction, b=outALU, sel=loadALUonAReg, out=outALUorIST);
 
-    // Aレジスタ instruction[15] が0の場合、A命令なのでそのままAレジスタにロードする
-    Not(in=instruction[15], out=loadAReg);
+    // Aレジスタ
+    // 読み込み(loadAReg)は、A命令の時、つまり、instruction[15] が0の場合、または、
+    // C命令の d1 が1の場合でinstruction[5] が1の場合に行う (loadALUonAReg)
+    Not(in=instruction[15], out=isACommand);
+    Or(a=isACommand, b=loadALUonAReg, out=loadAReg);
     ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out=outAReg2, out=addressM16);
     DIM16to15(in=addressM16, out=addressM);
 
