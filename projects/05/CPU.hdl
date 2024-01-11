@@ -85,8 +85,9 @@ CHIP CPU {
     // c1 instruction[11]〜c6 instruction[6]を表す
     ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, out=outM, zr=isALUoutZr, ng=isALUoutNeg);
 
-    // プログラムカウンタ(PC) loadPCが1の場合はAレジスタの値をPCにロードする、つまりJMP命令の場合
-    // ALUのputが、j1 (out<0) OR j2(out=0) OR j3(out>0) ならばjumpする
+    // C命令 instruction[15] が1の場合でかつ、
+    // プログラムカウンタ(PC) loadPCが1の場合はAレジスタの値をPCにロードする、つまりJMP命令の場合、
+    // ALUのputが、j1 (out<0) OR j2(out=0) OR j3(out>0) ならばjumpするためにPCにloadする
     And(a=isALUoutNeg, b=instruction[2], out=jump1);
     And(a=isALUoutZr, b=instruction[1], out=jump2);
     
@@ -97,14 +98,15 @@ CHIP CPU {
 
     Or(a=jump1, b=jump2, out=jump1or2);
     Or(a=jump1or2, b=jump3, out=jump1or2or3);
+    And(a=jump1or2or3, b=instruction[15], out=loadPC, out=loadPC2);
 
-    // インクリメントはjumpしないまたはリセットしない時、常に行う (積極維持することはないはず...)
+    // インクリメントは、ジャンプしない時、リセットしない時に行う
     // (not (jump1or2or3) ) or (not reset) = isInc
     // ドモルガンの法則でandに変換する
     // Not( jump1or2or3 and reset ) = isInc
-    And(a=jump1or2or3, b=reset, out=jump1or2or3andReset);
-    Not(in=jump1or2or3andReset, out=isInc);
-    PC(in=outAReg2, load=jump1or2or3, inc=isInc, reset=reset, out=pc16);
+    And(a=loadPC, b=reset, out=loadPCandReset);
+    Not(in=loadPCandReset, out=isInc);
+    PC(in=outAReg2, load=loadPC2, inc=isInc, reset=reset, out=pc16);
     DIM16to15(in=pc16, out=pc);
 
     // C命令のd3が1の場合は、ALUの出力をメモリにロードする (P100を参照)
