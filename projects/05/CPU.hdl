@@ -53,40 +53,47 @@ CHIP CPU {
     // addressM データメモリ(M)の中のアドレス
     // pc 次の命令のアドレス
 
+    // 配列のindexは右埋めであることに注意！
+    // A命令の先頭0はinstruction[15]に格納される
+    // C命令の先頭111はinstruction[15]〜instruction[13]に格納される
+
     // 制御を受けてALUかInstraction(命令メモリからの入力)を選択する
     // C命令のd1が1の場合は、ALUの出力をAレジスタにロードする (P100を参照)
-    // instruction[10] = 1 ならば、ALUの出力をAレジスタにロードする
-    Mux16(a=instruction, b=outALU, sel=instruction[10], out=outALUorIST);
+    // instruction[5] = 1 ならば、ALUの出力をAレジスタにロードする
+    // つまり、instruction[15] = 1 かつ instruction[5] = 1 の場合は、ALUの出力をAレジスタにロードする
+    And(a=instruction[15], b=instruction[5], out=loadALUonAReg);
+    Mux16(a=instruction, b=outALU, sel=loadALUonAReg, out=outALUorIST);
 
-    // Aレジスタ instruction[0] が1の場合、A命令なのでそのままAレジスタにロードする
-    ARegister(in=outALUorIST, load=instruction[0], out=outARegister, out=outARegister2, out=addressM16);
+    // Aレジスタ instruction[15] が0の場合、A命令なのでそのままAレジスタにロードする
+    Not(in=instruction[15], out=loadAReg);
+    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out=outAReg2, out=addressM16);
     DIM16to15(in=addressM16, out=addressM);
 
     // Aレジスタ or データメモリ
     // C命令の a が0の場合はAレジスタ、1の場合はMレジスタを選択する
-    // a はinstruction[3]を表す instruction[3]が1の場合はMレジスタを選択する
-    Mux16(a=outARegister, b=inM, sel=instruction[3], out=outAorM);
+    // a はinstruction[12]を表す instruction[12]が1の場合はMレジスタを選択する
+    Mux16(a=outAReg, b=inM, sel=instruction[12], out=outAorM);
 
     // Dレジスタ
     // C命令の d2 が1の場合は、ALUの出力をDレジスタにロードする (P100を参照)
-    // instruction[11] = 1 ならば、ALUの出力をDレジスタにロードする
-    DRegister(in=outALU2, load=instruction[11], out=outDRegister);
+    // instruction[4] = 1 ならば、ALUの出力をDレジスタにロードする
+    DRegister(in=outALU2, load=instruction[4], out=outDReg);
 
     // ALU xをD、yをAorMにする
     // C命令の a が0の場合はAレジスタ、1の場合はMレジスタを選択する
     // zx, nx, zy, ny, f, no はC命令のcompのc1〜c6表す
-    // c1 instruction[4]〜c6 instruction[9]を表す
-    ALU(x=outDRegister, y=outAorM, zx=instruction[4], nx=instruction[5], zy=instruction[6], ny=instruction[7], f=instruction[8], no=instruction[9], out=outALU, out=outALU2, out=outM, zr=isALUoutZero, ng=isALUoutNegative);
+    // c1 instruction[11]〜c6 instruction[6]を表す
+    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, out=outM, zr=isALUoutZr, ng=isALUoutNeg);
 
     // プログラムカウンタ(PC) loadPCが1の場合はAレジスタの値をPCにロードする、つまりJMP命令の場合
     // ALUのputが、j1 (out<0) OR j2(out=0) OR j3(out>0) ならばjumpする
-    And(a=isALUoutNegative, b=instruction[13], out=jump1);
-    And(a=isALUoutZero, b=instruction[14], out=jump2);
+    And(a=isALUoutNeg, b=instruction[2], out=jump1);
+    And(a=isALUoutZr, b=instruction[1], out=jump2);
     
-    Not(in=isALUoutNegative, out=notALUoutNegative);
-    Not(in=isALUoutZero, out=notALUoutZero);
-    And(a=notALUoutNegative, b=notALUoutZero, out=isALUoutPositive);
-    And(a=isALUoutPositive, b=instruction[15], out=jump3);
+    Not(in=isALUoutNeg, out=notALUoutNeg);
+    Not(in=isALUoutZr, out=notALUoutZr);
+    And(a=notALUoutNeg, b=notALUoutZr, out=isALUoutPos);
+    And(a=isALUoutPos, b=instruction[0], out=jump3);
 
     Or(a=jump1, b=jump2, out=jump1or2);
     Or(a=jump1or2, b=jump3, out=jump1or2or3);
@@ -97,12 +104,12 @@ CHIP CPU {
     // Not( jump1or2or3 and reset ) = isInc
     And(a=jump1or2or3, b=reset, out=jump1or2or3andReset);
     Not(in=jump1or2or3andReset, out=isInc);
-    PC(in=outARegister2, load=jump1or2or3, inc=isInc, reset=reset, out=pc16);
+    PC(in=outAReg2, load=jump1or2or3, inc=isInc, reset=reset, out=pc16);
     DIM16to15(in=pc16, out=pc);
 
     // C命令のd3が1の場合は、ALUの出力をメモリにロードする (P100を参照)
     // C命令 先頭111で始まり残り13bitをコンピュータに命令
-    // instruction[12] = 1 ならば、ALUの出力をメモリにロードする
-    And(a=instruction[0], b=instruction[12], out=writeM);
+    // つまり、instruction[15] = 1 かつ instruction[3] = 1 の場合は、ALUの出力をメモリにロードする
+    And(a=instruction[15], b=instruction[3], out=writeM);
     
 }
