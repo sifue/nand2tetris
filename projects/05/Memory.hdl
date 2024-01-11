@@ -44,6 +44,7 @@ CHIP Memory {
     // [13..14] = 11の時は、キーボードに対応 d(load4)
 
     // load信号を、MXu8Wayで必要なときだけloadするようにする
+    // 同じフォルダにチップがない限りはtools/builtInChips/にあるビルトインチップが使われる
     DMux4Way(in=load, sel=address[13..14], a=load1, b=load2, c=load3, d=load4);
     Mux(a=load1, b=load2, sel=address[13], out=loadRAM);
 
