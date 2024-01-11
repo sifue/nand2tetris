@@ -19,5 +19,38 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // 0 to 16383
+    // 15 14 13
+    // 0 0 0 000000000000
+    // to
+    // 0 0 1 111111111111
+    // ROMアクセスは14と15インデックスが00の時のみ、この時はROMに対応
+
+    // 16384 to 24575
+    // 15 14 13
+    // 0 1 0 000000000000
+    // to
+    // 0 1 0 111111111111
+    // つまり 010 の時は、スクリーンに対応
+
+    // 24576
+    // 0 1 1 000000000000
+    // つまり011 の時はその値は、キーボードに対応
+
+    // 15番目は常に0
+    // 14、13ビットで常に見る [13..14]
+    // [13..14] = 00および10の時は、RAMに対応 a(load1), b(load2) 13番は0と1の時にloadする
+    // [13..14] = 01の時は、スクリーンに対応 c(load3)
+    // [13..14] = 11の時は、キーボードに対応 d(load4)
+
+    // load信号を、MXu8Wayで必要なときだけloadするようにする
+    DMux4Way(in=load, sel=address[13..14], a=load1, b=load2, c=load3, d=load4);
+    Mux(a=load1, b=load2, sel=address[13], out=loadRAM);
+
+    RAM16K(in=in, load=loadRAM, address=address[0..13], out=outRAM16K);
+
+    Screen(in=in, load=load3, address=address[0..12], out=outScreen);
+    Keyboard(out=outKeyboard);
+
+    Mux4Way16(a=outRAM16K, b=outRAM16K, c=outScreen, d=outKeyboard, sel=address[13..14], out=out);
 }
