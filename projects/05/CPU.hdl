@@ -37,10 +37,13 @@ CHIP CPU {
     // Aレジスタ アドレスレジスタ
     // PC プログラムカウンタ
 
-    // A命令 先頭0で始まり残り15bitをAレジスタに格納
+    // A命令 先頭0(indexは15)で始まり残り15bitをAレジスタに格納
     // C命令 先頭111で始まり残り13bitをコンピュータに命令
     // C令令は 111 ac1c2c3c4c5c6 d1d2d3 j1j2j3 となる
     // ac1c2c3c4c5c6 はcomp、 dはdest、 jはjumpを表す
+    // instructionのindexで言うと
+    // 15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0 
+    // AC 1  1  a  c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
 
     // ### インプット
     // inM データメモリからの入力
@@ -79,8 +82,9 @@ CHIP CPU {
 
     // Dレジスタ
     // C命令の d2 が1の場合は、ALUの出力をDレジスタにロードする (P100を参照)
-    // instruction[4] = 1 ならば、ALUの出力をDレジスタにロードする
-    DRegister(in=outALU2, load=instruction[4], out=outDReg);
+    // C命令でかつ d2 instruction[4] = 1 ならば、ALUの出力をDレジスタにロード(loadDReg)する
+    And(a=instruction[15], b=instruction[4], out=loadDReg);
+    DRegister(in=outALU2, load=loadDReg, out=outDReg);
 
     // ALU xをD、yをAorMにする
     // C命令の a が0の場合はAレジスタ、1の場合はMレジスタを選択する
