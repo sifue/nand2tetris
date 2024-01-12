@@ -14,24 +14,8 @@ CHIP DMux4Way {
     OUT a, b, c, d;
 
     PARTS:
-    // 01の時、 sel[1] が 0、sel[0] が 1で右側から順になってる
-    // a = in & !sel[0] & !sel[1]
-    // b = in & sel[0] & !sel[1]
-    // c = in & !sel[0] & sel[1]
-    // d = in & sel[0] & sel[1]
-    Not(in=sel[0], out=nsel0);
-    Not(in=sel[1], out=nsel1);
-    
-    And(a=in, b=nsel0, out=na);
-    And(a=na, b=nsel1, out=a);
-
-    And(a=in, b=sel[0], out=nb);
-    And(a=nb, b=nsel1, out=b);
-
-    And(a=in, b=nsel0, out=nc);
-    And(a=nc, b=sel[1], out=c);
-
-    And(a=in, b=sel[0], out=nd);
-    And(a=nd, b=sel[1], out=d);
-
+    // DMuxを3つ使って分配する
+    DMux(in=in, sel=sel[1], a=ab, b=cd);
+    DMux(in=ab, sel=sel[0], a=a, b=b);
+    DMux(in=cd, sel=sel[0], a=c, b=d);
 }
