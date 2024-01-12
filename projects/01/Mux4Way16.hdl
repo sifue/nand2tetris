@@ -4,7 +4,7 @@
 // File name: projects/01/Mux4Way16.hdl
 /**
  * 4-way 16-bit multiplexor:
- * out = a if sel == 00
+ * out = a if sel == 00 index 0 が右のbit、index 1 が左のbit
  *       b if sel == 01
  *       c if sel == 10
  *       d if sel == 11
@@ -14,5 +14,8 @@ CHIP Mux4Way16 {
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+    Mux16(a=a, b=b, sel=sel[0], out=outab);
+    Mux16(a=c, b=d, sel=sel[0], out=outcd);
+    Mux16(a=outab, b=outcd, sel=sel[1], out=out);
+    
 }
