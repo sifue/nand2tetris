@@ -1,3 +1,6 @@
+// Use node v18.13.0
+// Command:
+// node assembler.js pong/PongL.asm 
 (async () => {
     console.log('Assembler started...');
 
@@ -259,6 +262,7 @@
 
 
     // メインの処理
+    SymbolTable.init();
     // 一度目のパース
     Parser.init();
     let romAddress = 0;
