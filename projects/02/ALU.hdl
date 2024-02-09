@@ -40,5 +40,24 @@ CHIP ALU {
         ng;      // (out < 0,  1, 0)
 
     PARTS:
-    //// Replace this comment with your code.
+    // 使える部品
+    // Mux16 
+
+    // zxを見て、入力xを0にする
+    // if (zx == 1) sets x = 0       // 16-bit constant
+    Mux16(a=x, b=false, sel=zx, out=x1);
+
+    // nxを見て、入力xを反転させる
+    // 使える部品 Not16
+    Not16(in=x1, out=nx1);
+    Mux16(a=x1, b=nx1, sel=nx, out=x2);
+
+    // zyを見て、入力yを0にする
+    // if (zy == 1) sets y = 0       // 16-bit constant
+    Mux16(a=y, b=false, sel=zy, out=y1);
+
+    // nyを見て、入力yを反転させる
+    // 使える部品 Not16
+    Not16(in=y1, out=ny1);
+    Mux16(a=y1, b=ny1, sel=ny, out=y2);
 }
