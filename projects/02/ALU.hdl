@@ -75,7 +75,6 @@ CHIP ALU {
     Mux16(a=fout, b=nfout, sel=no, out=out, out=out2, out=out3);
 
     // ここまででALU-basicsのテストの実装は完了！
-    // TODO: zr, ngの実装
 
     // zr とは
     // out == 0 なら 1、そうでないなら0
