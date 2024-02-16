@@ -1,0 +1,12 @@
+/**
+ * Is negative(i < 0) 16-bit
+ * in[0] ~ in[15]の16ビットの入力を受け取り、
+ * in[15]の値を返す
+ */
+CHIP Is16Neg {
+    IN in[16];
+    OUT out;
+
+    PARTS:
+    And(a=in[15], b=true, out=out);
+}
