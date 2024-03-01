@@ -13,5 +13,9 @@ CHIP Bit {
     OUT out;
 
     PARTS:
-    //// Replace this comment with your code.
+    // 図3-1の通り実装するとD型フリップフロップから
+    // 1ビットレジスタができる
+    Mux(a=dout, b=in, sel=load, out=mout);
+    DFF(in=mout, out=out, out=dout);
+    
 }
