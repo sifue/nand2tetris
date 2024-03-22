@@ -13,5 +13,24 @@ CHIP RAM8 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // 記憶するのに使いそうな部品
+    // - Register (16bit保存) (in16, load, out16)
+    // アドレスを分岐させるのに使いそう
+    // - DMux8Way (in, sel[3], outa, outb, outc, outd, oute, outf, outg, outh)
+    // レジスタの出力を集約するのに使えそう
+    // - Mux8Way16 (ina, inb, inc, ind, ine, inf, ing, inh, sel[3], out)
+    DMux8Way(in=load, sel=address, a=loada, b=loadb, c=loadc, d=loadd, e=loade, f=loadf, g=loadg, h=loadh);
+
+    // レジスタを8個なれべて、それぞれのレジスタに分岐したロード信号を送る
+    Register(in=in, load=loada, out=outa);
+    Register(in=in, load=loadb, out=outb);
+    Register(in=in, load=loadc, out=outc);
+    Register(in=in, load=loadd, out=outd);
+    Register(in=in, load=loade, out=oute);
+    Register(in=in, load=loadf, out=outf);
+    Register(in=in, load=loadg, out=outg);
+    Register(in=in, load=loadh, out=outh);
+
+    // それぞれのレジスタの出力を集約してアドレスの指定のものを出力
+    Mux8Way16(a=outa, b=outb, c=outc, d=outd, e=oute, f=outf, g=outg, h=outh, sel=address, out=out);
 }
