@@ -13,5 +13,18 @@ CHIP RAM16K {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // アドレスの上位2ビットを取り出す
+    // DMux4Wayを使って load を4つに分岐
+    // RAM4K を4つ使って実装
+    // それぞれの出力を Mux4Way16 で選択
+    DMux4Way(in=load, sel=address[12..13], a=loada, b=loadb, c=loadc, d=loadd);
+
+    // 4つのRAM4K
+    RAM4K(in=in, load=loada, address=address[0..11], out=outa);
+    RAM4K(in=in, load=loadb, address=address[0..11], out=outb);
+    RAM4K(in=in, load=loadc, address=address[0..11], out=outc);
+    RAM4K(in=in, load=loadd, address=address[0..11], out=outd);
+
+    // 4つの出力を選択
+    Mux4Way16(a=outa, b=outb, c=outc, d=outd, sel=address[12..13], out=out);
 }
