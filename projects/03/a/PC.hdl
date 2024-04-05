@@ -15,5 +15,24 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // IFの条件で一番弱い一番下の分岐の実装から実装して行くのがおすすめ
+    // 記憶素子は16bitしかいらないので Registerを使う
+
+    // 何もない時
+    // else                    out(t+1) = out(t)
+    Register(in=outIncedAndLoadedAndResetted, load=true, out=out, out=outToInc1, out=outToInc2);
+
+    // もしresetが1の時は、前の値に1を足す
+    // else if (inc(t) == 1)   out(t+1) = out(t) + 1
+    // 使いそうなのはInc16
+    Inc16(in=outToInc2, out=outInced);
+    Mux16(a=outToInc1, b=outInced, sel=inc, out=incrementedIn);
+
+    // もしloadが1の時は、inをRegisterにつっこむ！
+    // else if (load(t) == 1)  out(t+1) = in(t)
+    Mux16(a=incrementedIn, b=in, sel=load, out=outIncedAndLoaded);
+
+    // もしresetが1のと時は、0をRegisterにつっこむ！
+    // if      (reset(t) == 1) out(t+1) = 0
+    Mux16(a=outIncedAndLoaded, b=false, sel=reset, out=outIncedAndLoadedAndResetted);
 }
