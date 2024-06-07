@@ -14,10 +14,43 @@
  * Access to address 16384 to 24575 results in accessing the Screen memory map;
  * Access to address 24576 results in accessing the Keyboard memory map.
  */ 
+ // 要注意！ VSCodeのRun Scriptでは、キーボードとスクリーンのテストで固まるので
+ // それぞれのテストは、HardwareSimulatorでテストをしないといけない
 CHIP Memory {
     IN in[16], load, address[15];
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    // アドレス空間15bitを解釈する
+    // インデックスの15~0の並びを見ると、
+    // 000 0000 0000 0000 (0)
+    // to
+    // 011 1111 1111 1111 (16383) 
+    // ここがRAM16Kのアドレス空間 address[0..13]までがRAM16Kのアドレス空間
+
+    // 100 0000 0000 0000 (16384)
+    // to
+    // 101 1111 1111 1111 (24575)
+    // ここまでがScreenのアドレス空間 address[0..12]までがScreenのアドレス空間
+
+    // 110 0000 0000 0000 (24576)
+    // このアドレスだけがKeyboardのアドレス空間
+
+
+    // 14~13 => 00 および 01 の時はRAM16Kに接続 (DMux4Wayにおけるa,b)
+    // 14~13 = 10 の時はScreenに接続 (DMux4Wayにおけるc)
+    // 14~13 = 11 の時はKeyboardに接続 (DMux4Wayにおけるd)
+
+    // 使う部品
+    // loadは最初の2bitを見て4つに分配する必要がある
+    DMux4Way(in=load, sel=address[13..14], a=loadRAM16Ka, b=loadRAM16Kb, c=loadScreen, d=loadKeyboard);
+    Mux(a=loadRAM16Ka, b=loadRAM16Kb, sel=address[13], out=loadRAM16K);
+    
+    RAM16K(in=in, load=loadRAM16K, address=address[0..13], out=outRAM16K, out=outRAM16K2);
+    Screen(in=in, load=loadScreen, address=address[0..12], out=outScreen);
+    Keyboard(out=outKeyboard);
+
+    // 3つの出力をMuxで選択する
+    Mux4Way16(a=outRAM16K, b=outRAM16K2, c=outScreen, d=outKeyboard, sel=address[13..14], out=out);
+
 }
