@@ -37,7 +37,7 @@ CHIP CPU {
     // 1. 全てのパーツを並べる (Aレジスタ, Dレジスタ, ALU, PC)
     // 2. Aレジスタを実装する (A命令とC命令からALUの結果をつなげるところまで)
     // 3. Aレジスタ or データメモリの判定
-    // 4. DレジスタをALUにつなげる
+    // 4. DレジスタなどをALUにつなげる
     // 5. ALUのアウトプットを各レジスタに繋げる
     // 6. ジャンプ命令を実装する
     // 6. リセット機能を追加する
@@ -96,10 +96,16 @@ CHIP CPU {
     Mux16(a=outAReg, b=inM, sel=instruction[12], out=outAorM);
 
     // Dレジスタ
-    DRegister(in=false, load=false, out=outDReg);
+    // C命令の d2 が1の場合は、ALUの出力をDレジスタにロードする (P100を参照)
+    // C命令でかつ d2 instruction[4] = 1 ならば、ALUの出力をDレジスタにロード(loadDReg)する
+    And(a=instruction[15], b=instruction[4], out=loadDReg);
+    DRegister(in=outALU2, load=loadDReg, out=outDReg);
 
     // ALU
-    ALU(x=false, y=false, zx=false, nx=false, zy=false, ny=false, f=false, no=false, out=outALU, zr=isALUoutZr, ng=isALUoutNeg);
+    // xをDレジスタ(outDReg)、yをAレジスタorMメモリ(outAorM)にする
+    // zx, nx, zy, ny, f, no はC命令のcompのc1〜c6表す
+    // c1 instruction[11]〜c6 instruction[6]を表す
+    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
 
     // PC
     PC(in=false, load=false, inc=false, reset=reset, out=pc16);
