@@ -106,7 +106,7 @@ CHIP CPU {
     // xをDレジスタ(outDReg)、yをAレジスタorMメモリ(outAorM)にする
     // zx, nx, zy, ny, f, no はC命令のcompのc1〜c6表す
     // c1 instruction[11]〜c6 instruction[6]を表す
-    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
+    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, out=outM, zr=isALUoutZr, ng=isALUoutNeg);
 
     // PC
     // ジャンプ命令
@@ -140,4 +140,8 @@ CHIP CPU {
     // PCの出力は15bitなので、DIM16to15チップを別途実装してそれを使う
     DIM16to15(in=pc16, out=pc);
 
+    // メモリへの書き込み
+    // C命令のd3が1の場合は、ALUの出力をメモリにロードする (P100を参照)
+    // C命令は instruction[15] = 1 かつ instruction[3] == 1 の場合にALUのoutをoutMにしてメモリに書き込む
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }
