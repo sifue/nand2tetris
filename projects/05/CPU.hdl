@@ -32,5 +32,43 @@ CHIP CPU {
         pc[15];          // Address of next instruction
 
     PARTS:
-    //// Replace this comment with your code.
+
+    // # TODO
+    // 1. 全てのパーツを並べる (Aレジスタ, Dレジスタ, ALU, PC)
+    // 2. A命令を実装する
+    // 3. リセット機能を追加する
+    // 4. C命令をALUにつなげる
+    // 5. ALUのアウトプットを各レジスタに繋げる
+
+    // # 仕様
+    // 3つのレジスタからなる
+    // Dレジスタ データレジスタ
+    // Aレジスタ アドレスレジスタ
+    // PC プログラムカウンタ
+
+    // A命令 先頭0(indexは15)で始まり残り15bitをAレジスタに格納
+    // C命令 先頭111で始まり残り13bitをコンピュータに命令
+    // C令令は 111 ac1c2c3c4c5c6 d1d2d3 j1j2j3 となる
+    // ac1c2c3c4c5c6 はcomp、 dはdest、 jはjumpを表す
+    // instructionのindexで言うと
+    // 15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0 
+    // AC 1  1  a  c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+
+    // ### インプット
+    // inM データメモリからの入力
+    // instruction 命令メモリからの入力
+    // reset リセット信号 1の場合はpcを0にする
+
+    // ### アプトプット
+    // outM データメモリへの出力
+    // writeM データメモリへの書き込みをするか 1の場合は書き込みを行う
+    // addressM データメモリ(M)の中のアドレス
+    // pc 次の命令のアドレス
+
+    // 配列のindexは右埋めであることに注意！
+    // A命令の先頭0はinstruction[15]に格納される
+    // C命令の先頭111はinstruction[15]〜instruction[13]に格納される
+
+    // # 実装
+
 }
