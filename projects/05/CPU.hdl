@@ -39,8 +39,9 @@ CHIP CPU {
     // 3. Aレジスタ or データメモリの判定
     // 4. DレジスタなどをALUにつなげる
     // 5. ALUのアウトプットを各レジスタに繋げる
-    // 6. ジャンプ命令を実装する
-    // 6. リセット機能を追加する
+    // 6. PCのジャンプ命令とインクリメントを実装する
+    // 7. PCのリセット機能を追加する
+    // 8. メモリへの書き込みを実装する
 
     // # 仕様
     // 3つのレジスタからなる
@@ -86,7 +87,7 @@ CHIP CPU {
     // C命令の d1 が1の場合つまり instruction[5] が1の場合に行う (loadALUonAReg)
     Not(in=instruction[15], out=isACommand);
     Or(a=isACommand, b=loadALUonAReg, out=loadAReg);
-    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out=addressM16);
+    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out=outAReg2, out=addressM16);
     // 出力は15bitなので、DIM16to15チップを別途実装する
     DIM16to15(in=addressM16, out=addressM);
 
@@ -108,6 +109,35 @@ CHIP CPU {
     ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
 
     // PC
-    PC(in=false, load=false, inc=false, reset=reset, out=pc16);
+    // ジャンプ命令
+    // プログラムカウンタ(PC) loadPCが1の場合はAレジスタの値をPCにロードする、つまりJMP命令の場合、
+    // ALUのputが、j1 (out<0) OR j2(out=0) OR j3(out>0) ならばjumpするためにPCにoutARegをloadする
+    
+    // j1 == 1 かつ out<0
+    And(a=isALUoutNeg, b=instruction[2], out=jump1);
+    // j2 == 1 かつ out=0
+    And(a=isALUoutZr, b=instruction[1], out=jump2);
+    // j3 == 1 かつ out>0
+    Not(in=isALUoutNeg, out=notALUoutNeg);
+    Not(in=isALUoutZr, out=notALUoutZr);
+    And(a=notALUoutNeg, b=notALUoutZr, out=isALUoutPos);
+    And(a=isALUoutPos, b=instruction[0], out=jump3);
+
+    // (jump1 or jump2 or jump3) かつ instruction[15] = 1 でC命令
+    Or(a=jump1, b=jump2, out=jump1or2);
+    Or(a=jump1or2, b=jump3, out=jump1or2or3);
+    And(a=jump1or2or3, b=instruction[15], out=loadPC, out=loadPC2);
+
+    // インクリメントは、ジャンプしない時、リセットしない時に行う
+    // (not (jump1or2or3) ) or (not reset) = isInc
+    // ド・モルガンの法則でandに変換する
+    // Not( jump1or2or3 and reset ) = isInc
+    And(a=loadPC, b=reset, out=loadPCandReset);
+    Not(in=loadPCandReset, out=isInc);
+    
+    // PC
+    PC(in=outAReg2, load=loadPC, inc=isInc, reset=reset, out=pc16);
+    // PCの出力は15bitなので、DIM16to15チップを別途実装してそれを使う
+    DIM16to15(in=pc16, out=pc);
 
 }
