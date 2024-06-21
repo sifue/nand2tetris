@@ -68,7 +68,16 @@ CHIP CPU {
     // pc 次の命令のアドレス
 
     // # 実装
-    ARegister(in=false, load=false, out=outAReg);
+
+    // Aレジスタ
+    // Aレジスタの読み込みは、
+    // instractionがA命令の場合(idx:15が0)は、そのままAレジスタに格納
+    // instractionがC命令の場合(idx:15が1) かつ d1(idx:5が1)の場合は、ALUの結果をAレジスタに格納 (loadALUouttoAReg)
+    And(a=instruction[15], b=instruction[5], out=loadALUouttoAReg);
+    Mux16(a=instruction, b=outALU, sel=loadALUouttoAReg, out=outALUorIST);
+    Not(in=instruction[15], out=isAInstruction);
+    Or(a=isAInstruction, b=loadALUouttoAReg, out=loadAReg);
+    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out[0..14]=addressM);
 
     DRegister(in=false, load=false, out=outDReg);
 
