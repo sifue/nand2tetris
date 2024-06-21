@@ -32,5 +32,50 @@ CHIP CPU {
         pc[15];          // Address of next instruction
 
     PARTS:
-    //// Replace this comment with your code.
+    // # 実装方針
+    // 1. 全てのパーツを並べる (Aレジスタ, Dレジスタ, ALU, PC)
+    // 2. Aレジスタを実装する (A命令とC命令からALUの結果をつなげるところまで)
+    // 3. Aレジスタ or データメモリの判定
+    // 4. DレジスタなどをALUにつなげる
+    // 5. ALUのアウトプットを各レジスタに繋げる
+    // 6. PCのジャンプ命令とインクリメントを実装する
+    // 7. PCのリセット機能を追加する
+    // 8. メモリへの書き込みを実装する
+
+    // # 仕様
+    // 3つのレジスタからなる
+    // Dレジスタ データレジスタ
+    // Aレジスタ アドレスレジスタ
+    // PC プログラムカウンタ
+
+    // A命令 先頭0(indexは15)で始まり、残り15bitをAレジスタに格納
+    // C命令 先頭111で始まり残り13bitをコンピュータに命令
+    // C令令は 111 a c1c2c3c4c5c6 d1d2d3 j1j2j3 となる
+    // ac1c2c3c4c5c6 はcomp、 dはdest、 jはjumpを表す
+    // instructionのindexで言うと
+    // 15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0 
+    // AC 1  1  a  c1 c2 c3 c4 c5 c6 d1 d2 d3 j1 j2 j3
+
+    // ### インプット
+    // inM データメモリからの入力
+    // instruction 命令メモリからの入力
+    // reset リセット信号 1の場合はpcを0にする
+
+    // ### アプトプット
+    // outM データメモリへの出力
+    // writeM データメモリへの書き込みをするか 1の場合は書き込みを行う
+    // addressM データメモリ(M)の中のアドレス
+    // pc 次の命令のアドレス
+
+    // # 実装
+    ARegister(in=false, load=false, out=outAReg);
+
+    DRegister(in=false, load=false, out=outDReg);
+
+    ALU(x=false, y=false, zx=false, nx=false, zy=false, ny=false, f=false, no=false, out=outALU, zr=isALUoutZr, ng=isALUoutNeg);
+
+    PC(in=false, load=false, inc=false, reset=reset, out=outPC16);
+
+
+
 }
