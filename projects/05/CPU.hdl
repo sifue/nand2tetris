@@ -95,7 +95,7 @@ CHIP CPU {
     // zx, nx, zy, ny, f, no はALUの制御信号で、それぞれの意味は以下
     // c1 instruction[11] ~ c6 instruction[6] に当たる
     // zx = instruction[11] ...
-    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
+    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, out=outM, zr=isALUoutZr, ng=isALUoutNeg);
 
     // PCのジャンプ命令とインクリメントを実装する
     // ジャンプ命令
@@ -129,4 +129,9 @@ CHIP CPU {
     Not(in=loadPCandReset, out=isInc);
 
     PC(in=outAReg2, load=loadPC, inc=isInc, reset=reset, out[0..14]=pc);
+
+    // メモリへの書き込みを実装する
+    // d3 が 1の場合は、データメモリに書き込む
+    // かつ C命令
+    And(a=instruction[15], b=instruction[3], out=writeM);
 }
