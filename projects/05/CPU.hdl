@@ -79,9 +79,18 @@ CHIP CPU {
     Or(a=isAInstruction, b=loadALUouttoAReg, out=loadAReg);
     ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out[0..14]=addressM);
 
-    DRegister(in=false, load=false, out=outDReg);
+    // Aレジスタ or データメモリの判定
+    // C命令のa領域を確認する index 12の部分
+    // instruction[12]が1の場合は、データメモリを扱い、0の場合はAレジスタを読み込む
+    Mux16(a=outAReg, b=inM, sel=instruction[12], out=outAorM);
 
-    ALU(x=false, y=false, zx=false, nx=false, zy=false, ny=false, f=false, no=false, out=outALU, zr=isALUoutZr, ng=isALUoutNeg);
+    // DレジスタなどをALUにつなげる
+    // C命令の d2 が1の場合は、ALUの出力をDレジスタに格納
+    // C命令かつ、 d2 つまり instruction[4]が1の場合は、ALUの出力をDレジスタに格納
+    And(a=instruction[15], b=instruction[4], out=loadDReg);
+    DRegister(in=outALU2, load=loadDReg, out=outDReg);
+
+    ALU(x=false, y=false, zx=false, nx=false, zy=false, ny=false, f=false, no=false, out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
 
     PC(in=false, load=false, inc=false, reset=reset, out=outPC16);
 
