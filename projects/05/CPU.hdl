@@ -77,7 +77,7 @@ CHIP CPU {
     Mux16(a=instruction, b=outALU, sel=loadALUouttoAReg, out=outALUorIST);
     Not(in=instruction[15], out=isAInstruction);
     Or(a=isAInstruction, b=loadALUouttoAReg, out=loadAReg);
-    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out[0..14]=addressM);
+    ARegister(in=outALUorIST, load=loadAReg, out=outAReg, out=outAReg2, out[0..14]=addressM);
 
     // Aレジスタ or データメモリの判定
     // C命令のa領域を確認する index 12の部分
@@ -97,8 +97,36 @@ CHIP CPU {
     // zx = instruction[11] ...
     ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
 
-    PC(in=false, load=false, inc=false, reset=reset, out=outPC16);
+    // PCのジャンプ命令とインクリメントを実装する
+    // ジャンプ命令
+    // プログラムカウンタ(PC)の loadPCを作る (loadに読み込む)
+    // ALUの出力と条件によって loadPCが決まる
+    // ALUのoutが、j1 (out < 0), j2 (out == 0), j3 (out > 0) の場合にジャンプする
 
+    // j1 == 1 かつ ALUのout < 0 の場合
+    And(a=instruction[2], b=isALUoutNeg, out=jump1);
 
+    // j2 == 1 かつ ALUのout == 0 の場合
+    And(a=instruction[1], b=isALUoutZr, out=jump2);
 
+    // j3 == 1 かつ ALUのout > 0 の場合
+    Not(in=isALUoutNeg, out=notALUoutNeg);
+    Not(in=isALUoutZr, out=notALUoutZr);
+    And(a=notALUoutNeg, b=notALUoutZr, out=isALUoutPos);
+    And(a=instruction[0], b=isALUoutPos, out=jump3);
+
+    // (jump1 or jump2 or jump3) かつ instruction[15] == 1(C命令) の場合。それが loadPC つまりジャンプ実行の条件
+    Or(a=jump1, b=jump2, out=jump1orjump2);
+    Or(a=jump1orjump2, b=jump3, out=jump1orjump2orjump3);
+    And(a=jump1orjump2orjump3, b=instruction[15], out=loadPC);
+
+    // PCのリセット機能を追加する
+    // インクリメントは、ジャンプしない時orリセットしない時がisInc
+    // not (jump1 or jump2 or jump3) or not reset
+    // ドモルガンの法則で書き換えて
+    // (jump1 or jump2 or jump3) and reset
+    And(a=loadPC, b=reset, out=loadPCandReset);
+    Not(in=loadPCandReset, out=isInc);
+
+    PC(in=outAReg2, load=loadPC, inc=isInc, reset=reset, out[0..14]=pc);
 }
