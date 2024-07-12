@@ -90,7 +90,12 @@ CHIP CPU {
     And(a=instruction[15], b=instruction[4], out=loadDReg);
     DRegister(in=outALU2, load=loadDReg, out=outDReg);
 
-    ALU(x=false, y=false, zx=false, nx=false, zy=false, ny=false, f=false, no=false, out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
+    // ALUのアウトプットを各レジスタに繋げる
+    // xがDレジスタ、yがAレジスタ or データメモリの出力を入力とする
+    // zx, nx, zy, ny, f, no はALUの制御信号で、それぞれの意味は以下
+    // c1 instruction[11] ~ c6 instruction[6] に当たる
+    // zx = instruction[11] ...
+    ALU(x=outDReg, y=outAorM, zx=instruction[11], nx=instruction[10], zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], out=outALU, out=outALU2, zr=isALUoutZr, ng=isALUoutNeg);
 
     PC(in=false, load=false, inc=false, reset=reset, out=outPC16);
 
